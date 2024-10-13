@@ -96,7 +96,7 @@ def app():
     user_input = st.text_input("You:")
 
     # Avatar link (replace with an actual avatar image link)
-    avatar_url = "https://drive.google.com/uc?id=1X3dYj0dgdtu-updhhfJA4KIRX_QN96mi"
+    avatar_url = "https://drive.google.com/drive/folders/1CUHE3eTConP4BqpShR5flDqXwyObkcvy"
 
     # Generate chatbot response when the user submits input
     if user_input:
