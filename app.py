@@ -1,4 +1,3 @@
-# Import necessary libraries
 import os
 import streamlit as st
 from transformers import T5Tokenizer, T5ForConditionalGeneration
@@ -6,10 +5,19 @@ from gtts import gTTS
 import base64
 from io import BytesIO
 import torch
-import kagglehub
+import zipfile
 
-# Load dataset using KaggleHub
-path = kagglehub.dataset_download("rajathmc/cornell-moviedialog-corpus")
+# Path to the downloaded zip file in your GitHub repo
+dataset_path = 'data/cornell-movie-dialogs-corpus.zip'
+
+# Unzipping the dataset if not already extracted
+if not os.path.exists('data/cornell-movie-dialogs-corpus'):
+    with zipfile.ZipFile(dataset_path, 'r') as zip_ref:
+        zip_ref.extractall('data/')
+
+# Now you can use the extracted files
+lines_file = 'data/cornell movie-dialogs-corpus/movie_lines.txt'
+conversations_file = 'data/cornell movie-dialogs-corpus/movie_conversations.txt'
 
 # Define the T5 model and tokenizer
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
