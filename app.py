@@ -55,9 +55,9 @@ model = T5ForConditionalGeneration.from_pretrained('t5-small')
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
-# Function to generate chatbot responses
+# Function to generate chatbot responses in English
 def generate_response(user_input):
-    input_text = user_input.strip()  # Removed the "dialogue:" prefix
+    input_text = f"English: {user_input.strip()}"  # Prepend English directive
     input_ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
     outputs = model.generate(input_ids, max_length=100, num_beams=5, early_stopping=True)
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
