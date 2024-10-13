@@ -10,76 +10,64 @@ import base64
 from io import BytesIO
 import torch
 import zipfile
-import gdown
 from kaggle.api.kaggle_api_extended import KaggleApi
 
-# Install transformers if not already installed
-os.system('pip install transformers')
-
-# Function to download the dataset from Kaggle
-def download_from_kaggle():
-    from kaggle.api.kaggle_api_extended import KaggleApi
+# Download dataset using Kaggle API
+def download_dataset():
     api = KaggleApi()
     api.authenticate()
-    try:
-        api.dataset_download_files('rajathmc/cornell-moviedialog-corpus', path='data', unzip=True)
-        st.write("Downloaded dataset from Kaggle successfully!")
-        return True
-    except Exception as e:
-        st.write("Kaggle download failed: ", e)
-        return False
-
-# Function to load the dataset from Google Drive if Kaggle fails
-def load_from_drive():
-    dataset_path = 'data/cornell-movie-dialogs-corpus.zip'
-    with zipfile.ZipFile(dataset_path, 'r') as zip_ref:
+    api.dataset_download_file('rajathmc/cornell-moviedialog-corpus', 'cornell-movie-dialogs-corpus.zip', path='data/')
+    with zipfile.ZipFile('data/cornell-movie-dialogs-corpus.zip', 'r') as zip_ref:
         zip_ref.extractall('data/')
-    st.write("Loaded dataset from Google Drive!")
+    print("Downloaded dataset from Kaggle successfully!")
 
-# Main app function
+# Download the dataset (remove if already downloaded)
+download_dataset()
+
+# Path to the extracted dataset files
+lines_file = 'data/cornell movie-dialogs-corpus/movie_lines.txt'
+conversations_file = 'data/cornell movie-dialogs-corpus/movie_conversations.txt'
+
+# Define the T5 model and tokenizer
+tokenizer = T5Tokenizer.from_pretrained('t5-small')
+model = T5ForConditionalGeneration.from_pretrained('t5-small')
+
+# Use GPU if available
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model.to(device)
+
+# Function to generate chatbot responses
+def generate_response(user_input):
+    input_text = f"dialogue: {user_input.strip()} </s>"
+    input_ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
+    outputs = model.generate(input_ids, max_length=100, num_beams=5, early_stopping=True)
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return response
+
+# Function to generate TTS audio for chatbot response
+def generate_audio(text):
+    tts = gTTS(text)
+    mp3_fp = BytesIO()
+    tts.write_to_fp(mp3_fp)
+    mp3_fp.seek(0)
+    return mp3_fp
+
+# Function to display avatar and play audio
+def display_avatar_and_audio(avatar_url, audio_fp):
+    avatar_html = f"""
+    <img src="{avatar_url}" alt="Avatar" width="150" height="150">
+    """
+    audio_html = f"""
+    <audio autoplay>
+        <source src="data:audio/mpeg;base64,{base64.b64encode(audio_fp.read()).decode('utf-8')}" type="audio/mpeg">
+    </audio>
+    """
+    st.markdown(avatar_html, unsafe_allow_html=True)
+    st.markdown(audio_html, unsafe_allow_html=True)
+
+# Streamlit app code
 def app():
     st.title("Generative AI Chatbot with Cornell Dataset")
-
-    # Try to download from Kaggle first, if that fails, load from Google Drive
-    if not download_from_kaggle():
-        load_from_drive()
-
-    # Load the T5 model and tokenizer
-    tokenizer = T5Tokenizer.from_pretrained('t5-small')
-    model = T5ForConditionalGeneration.from_pretrained('t5-small')
-
-    # Use GPU if available
-    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-    model.to(device)
-
-    # Function to generate chatbot responses
-    def generate_response(user_input):
-        input_text = f"dialogue: {user_input.strip()} </s>"
-        input_ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
-        outputs = model.generate(input_ids, max_length=100, num_beams=5, early_stopping=True)
-        response = tokenizer.decode(outputs[0], skip_special_tokens=True)
-        return response
-
-    # Function to generate TTS audio for chatbot response
-    def generate_audio(text):
-        tts = gTTS(text)
-        mp3_fp = BytesIO()
-        tts.write_to_fp(mp3_fp)
-        mp3_fp.seek(0)
-        return mp3_fp
-
-    # Function to display avatar and play audio
-    def display_avatar_and_audio(avatar_url, audio_fp):
-        avatar_html = f"""
-        <img src="{avatar_url}" alt="Avatar" width="150" height="150">
-        """
-        audio_html = f"""
-        <audio autoplay>
-            <source src="data:audio/mpeg;base64,{base64.b64encode(audio_fp.read()).decode('utf-8')}" type="audio/mpeg">
-        </audio>
-        """
-        st.markdown(avatar_html, unsafe_allow_html=True)
-        st.markdown(audio_html, unsafe_allow_html=True)
 
     # Session state to store conversation history
     if 'conversation' not in st.session_state:
