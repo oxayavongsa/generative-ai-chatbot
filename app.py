@@ -8,42 +8,8 @@ import base64
 from io import BytesIO
 import torch
 import zipfile
-import requests
 
-# Function to download file from Google Drive
-def download_file_from_google_drive(id, destination):
-    URL = "https://drive.google.com/uc?export=download"
-    session = requests.Session()
-    response = session.get(URL, params={'id': id}, stream=True)
-    token = get_confirm_token(response)
-    if token:
-        params = {'id': id, 'confirm': token}
-        response = session.get(URL, params=params, stream=True)
-    save_response_content(response, destination)
-
-def get_confirm_token(response):
-    for key, value in response.cookies.items():
-        if key.startswith('download_warning'):
-            return value
-    return None
-
-def save_response_content(response, destination):
-    CHUNK_SIZE = 32768
-    with open(destination, "wb") as f:
-        for chunk in response.iter_content(CHUNK_SIZE):
-            if chunk:
-                f.write(chunk)
-
-# Download the dataset from Google Drive
-file_id = '1SRKwsK00pEBBezUA5zGM8So6kay4i9Qs'  # Your file ID from Google Drive
-destination = 'data/cornell-movie-dialogs-corpus.zip'
-download_file_from_google_drive(file_id, destination)
-
-# Unzip the dataset
-with zipfile.ZipFile(destination, 'r') as zip_ref:
-    zip_ref.extractall('data/')
-
-# Paths to the extracted files
+# Paths to the extracted files (assuming the dataset is already downloaded in the 'data' folder)
 lines_file = 'data/cornell movie-dialogs-corpus/movie_lines.txt'
 conversations_file = 'data/cornell movie-dialogs-corpus/movie_conversations.txt'
 
@@ -95,8 +61,9 @@ def app():
     # User input for the chatbot
     user_input = st.text_input("You:")
 
-    # Avatar link (replace with an actual avatar image link)
-    avatar_url = "https://drive.google.com/drive/folders/1CUHE3eTConP4BqpShR5flDqXwyObkcvy"
+    # Avatar link (use a direct Google Drive link)
+   avatar_url = "https://raw.githubusercontent.com/oxayavongsa/generative-ai-chatbot/main/images/Man_Avatar.png"
+
 
     # Generate chatbot response when the user submits input
     if user_input:
