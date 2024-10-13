@@ -5,8 +5,8 @@ import streamlit as st
 from kaggle.api.kaggle_api_extended import KaggleApi
 
 # Set up Kaggle API credentials directly from environment variables
-os.environ['KAGGLE_USERNAME'] = 'your_kaggle_username'  # replace with your username
-os.environ['KAGGLE_KEY'] = 'your_kaggle_key'  # replace with your API key
+os.environ['KAGGLE_USERNAME'] = 'outhaixayavongsa'  # replace with your username
+os.environ['KAGGLE_KEY'] = '013bebdbf0776ed704f846ef0b3b3381'  # replace with your API key
 
 # Initialize the Kaggle API
 api = KaggleApi()
