@@ -4,3 +4,4 @@ streamlit
 gTTS
 kaggle
 pandas
+kagglehub
