@@ -1,9 +1,9 @@
+streamlit
 transformers
 torch
-gtts
-streamlit
+gTTS
 pandas
 gdown
 requests
-sentencepiece
-sacremoses
+kaggle
+kaggleapi
