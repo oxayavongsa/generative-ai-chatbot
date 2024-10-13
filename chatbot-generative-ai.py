@@ -18,8 +18,14 @@ import pandas as pd
 os.environ['KAGGLE_USERNAME'] = 'outhaixayavongsa'  # Replace with your Kaggle username
 os.environ['KAGGLE_KEY'] = '013bebdbf0776ed704f846ef0b3b3381'  # Replace with your Kaggle API key
 
-# Download the dataset
-!kaggle datasets download -d rajathmc/cornell-moviedialog-corpus
+from kaggle.api.kaggle_api_extended import KaggleApi
+
+# Initialize the Kaggle API
+api = KaggleApi()
+api.authenticate()
+
+# Download the dataset from Kaggle
+api.dataset_download_files('rajathmc/cornell-moviedialog-corpus', path='data/', unzip=True)
 
 # Unzip the dataset (A for All and Press Enter))
 !unzip cornell-moviedialog-corpus.zip
