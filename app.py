@@ -1,81 +1,89 @@
+# Import necessary libraries
 import os
-import zipfile
-import pandas as pd
 import streamlit as st
-from kaggle.api.kaggle_api_extended import KaggleApi
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+from gtts import gTTS
+import base64
+from io import BytesIO
+import torch
+import kagglehub
 
-# Set up Kaggle API credentials directly from environment variables
-os.environ['KAGGLE_USERNAME'] = 'outhaixayavongsa'  # replace with your username
-os.environ['KAGGLE_KEY'] = '013bebdbf0776ed704f846ef0b3b3381'  # replace with your API key
+# Load dataset using KaggleHub
+path = kagglehub.dataset_download("rajathmc/cornell-moviedialog-corpus")
 
-# Initialize the Kaggle API
-api = KaggleApi()
-api.authenticate()
+# Define the T5 model and tokenizer
+tokenizer = T5Tokenizer.from_pretrained('t5-small')
+model = T5ForConditionalGeneration.from_pretrained('t5-small')
 
-# Define paths
-dataset_path = 'data/cornell-movie-dialog-corpus.zip'
-lines_file = 'data/cornell movie-dialog-corpus/movie_lines.txt'
-conversations_file = 'data/cornell movie-dialog-corpus/movie_conversations.txt'
+# Use GPU if available
+device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+model.to(device)
 
-# Download the Cornell Movie Dialog Corpus dataset
-if not os.path.exists(dataset_path):
-    st.write("Downloading dataset from Kaggle...")
-    api.dataset_download_files('rajathmc/cornell-moviedialog-corpus', path='data/', unzip=False)
+# Function to generate chatbot responses
+def generate_response(user_input):
+    input_text = f"dialogue: {user_input.strip()} </s>"
+    input_ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
+    outputs = model.generate(input_ids, max_length=100, num_beams=5, early_stopping=True)
+    response = tokenizer.decode(outputs[0], skip_special_tokens=True)
+    return response
 
-# Unzip the dataset if not already done
-if not os.path.exists(lines_file) or not os.path.exists(conversations_file):
-    with zipfile.ZipFile(dataset_path, 'r') as zip_ref:
-        zip_ref.extractall('data/')
-    st.write("Dataset extracted.")
+# Function to generate TTS audio for chatbot response
+def generate_audio(text):
+    tts = gTTS(text)
+    mp3_fp = BytesIO()
+    tts.write_to_fp(mp3_fp)
+    mp3_fp.seek(0)
+    return mp3_fp
 
-# Function to load and parse movie_lines.txt
-def parse_movie_lines(lines_file):
-    lines = {}
-    with open(lines_file, 'r', encoding='utf-8', errors='replace') as file:
-        for line in file:
-            parts = line.strip().split(" +++$+++ ")
-            if len(parts) == 5:
-                line_id = parts[0]
-                text = parts[4]
-                lines[line_id] = text
-    return lines
+# Function to display avatar and play audio
+def display_avatar_and_audio(avatar_url, audio_fp):
+    avatar_html = f"""
+    <img src="{avatar_url}" alt="Avatar" width="150" height="150">
+    """
+    audio_html = f"""
+    <audio autoplay>
+        <source src="data:audio/mpeg;base64,{base64.b64encode(audio_fp.read()).decode('utf-8')}" type="audio/mpeg">
+    </audio>
+    """
+    st.markdown(avatar_html, unsafe_allow_html=True)
+    st.markdown(audio_html, unsafe_allow_html=True)
 
-# Function to load and parse movie_conversations.txt
-def parse_movie_conversations(conversations_file):
-    conversations = []
-    with open(conversations_file, 'r', encoding='utf-8', errors='replace') as file:
-        for line in file:
-            parts = line.strip().split(" +++$+++ ")
-            if len(parts) == 4:
-                line_ids = eval(parts[3])  # This is a list of line IDs in a conversation
-                conversations.append(line_ids)
-    return conversations
+# Streamlit app code
+def app():
+    st.title("Generative AI Chatbot with Cornell Dataset")
 
-# Load the movie lines and conversations data
-movie_lines = parse_movie_lines(lines_file)
-movie_conversations = parse_movie_conversations(conversations_file)
+    # Session state to store conversation history
+    if 'conversation' not in st.session_state:
+        st.session_state.conversation = []
 
-# Function to create dialog pairs from movie lines and conversations
-def create_dialog_pairs(conversations, lines):
-    dialog_pairs = []
-    for conversation in conversations:
-        for i in range(len(conversation) - 1):
-            input_line = lines.get(conversation[i], "")
-            response_line = lines.get(conversation[i + 1], "")
-            if input_line and response_line:
-                dialog_pairs.append((input_line, response_line))
-    return dialog_pairs
+    # User input for the chatbot
+    user_input = st.text_input("You:")
 
-# Create dialog pairs
-dialog_pairs = create_dialog_pairs(movie_conversations, movie_lines)
+    # Avatar link (replace with an actual avatar image link)
+    avatar_url = "https://drive.google.com/uc?id=1X3dYj0dgdtu-updhhfJA4KIRX_QN96mi"
 
-# Convert dialog pairs to a DataFrame
-dialog_df = pd.DataFrame(dialog_pairs, columns=['input', 'response'])
+    # Generate chatbot response when the user submits input
+    if user_input:
+        response = generate_response(user_input)
+        
+        # Append conversation history
+        st.session_state.conversation.append({"user": user_input, "bot": response})
+        
+        # Generate TTS audio for the bot response
+        audio_fp = generate_audio(response)
 
-# Streamlit UI
-st.title("Generative AI Chatbot with Cornell Dataset")
+        # Display avatar and play audio
+        display_avatar_and_audio(avatar_url, audio_fp)
 
-# Display the first few rows of dialog pairs
-st.write(dialog_df.head())
+    # Display conversation history
+    for chat in st.session_state.conversation:
+        st.write(f"**You:** {chat['user']}")
+        st.write(f"**Bot:** {chat['bot']}")
 
-# Optional: Functionality to display more detailed analysis or to work with the dialog_df can be added below
+    # Button to clear conversation history
+    if st.button("Clear Conversation"):
+        st.session_state.conversation = []
+
+# Launch the Streamlit app
+if __name__ == '__main__':
+    app()
