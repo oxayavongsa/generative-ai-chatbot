@@ -1,3 +1,6 @@
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+import torch
+
 # Import necessary libraries
 import os
 import streamlit as st
@@ -9,16 +12,6 @@ import torch
 import zipfile
 import gdown
 from kaggle.api.kaggle_api_extended import KaggleApi
-
-# Import necessary libraries
-import os
-import streamlit as st
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-from gtts import gTTS
-import base64
-from io import BytesIO
-import torch
-import zipfile
 
 # Install transformers if not already installed
 os.system('pip install transformers')
