@@ -5,17 +5,31 @@ from gtts import gTTS
 import base64
 from io import BytesIO
 import torch
-import zipfile
+from zipfile import ZipFile
+from kaggle.api.kaggle_api_extended import KaggleApi
 
-# Path to the downloaded zip file in your GitHub repo
-dataset_path = 'data/cornell-movie-dialogs-corpus.zip'
+# Function to download and extract the dataset
+def download_dataset():
+    # Set your Kaggle credentials in environment variables (ensure they are set securely)
+    os.environ['KAGGLE_USERNAME'] = 'outhaixayavongsa'
+    os.environ['KAGGLE_KEY'] = '013bebdbf0776ed704f846ef0b3b3381'
 
-# Unzipping the dataset if not already extracted
-if not os.path.exists('data/cornell-movie-dialogs-corpus'):
-    with zipfile.ZipFile(dataset_path, 'r') as zip_ref:
+    # Initialize Kaggle API
+    api = KaggleApi()
+    api.authenticate()
+
+    # Download the dataset
+    dataset_path = 'data/cornell-movie-dialogs-corpus.zip'
+    api.dataset_download_file('rajathmc/cornell-moviedialog-corpus', 'cornell-movie-dialogs-corpus.zip', path='data')
+
+    # Unzip the dataset
+    with ZipFile(dataset_path, 'r') as zip_ref:
         zip_ref.extractall('data/')
 
-# Now you can use the extracted files
+# Call the dataset download function
+download_dataset()
+
+# File paths after extracting
 lines_file = 'data/cornell movie-dialogs-corpus/movie_lines.txt'
 conversations_file = 'data/cornell movie-dialogs-corpus/movie_conversations.txt'
 
