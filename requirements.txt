@@ -8,3 +8,4 @@ requests
 transformers==4.22.0
 torch==1.10.0
 gtts==2.2.3
+streamlit==1.13.0
