@@ -1,31 +1,32 @@
 import pandas as pd
+import torch
+from transformers import T5Tokenizer, T5ForConditionalGeneration
+import streamlit as st
 
-# Assuming the dataset is in the same directory as your app.py
+# Function to load and preprocess data
 def load_data():
     lines_file = 'movie_lines.txt'
     conversations_file = 'movie_conversations.txt'
-
-    # Load the data (adjust the parsing according to your logic)
+    
+    # Load the dataset (adjust parsing according to your needs)
+    lines, conversations = [], []
     with open(lines_file, 'r', encoding='utf-8', errors='replace') as f:
         lines = f.readlines()
 
     with open(conversations_file, 'r', encoding='utf-8', errors='replace') as f:
         conversations = f.readlines()
-
+    
+    # You can now return the parsed data as needed
     return lines, conversations
 
-# Load the data when the app starts
+# Load data
 lines, conversations = load_data()
 
-import torch
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-import streamlit as st
-
-# Load the T5 model and tokenizer
+# Set up T5 model and tokenizer
 tokenizer = T5Tokenizer.from_pretrained('t5-small')
 model = T5ForConditionalGeneration.from_pretrained('t5-small')
 
-# Use GPU if available, else fallback to CPU
+# Set up device
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 model.to(device)
 
@@ -39,10 +40,9 @@ def generate_response(user_input):
 
 # Streamlit UI
 st.title("Generative AI Chatbot")
-st.write("This chatbot generates responses based on English dialogue.")
 
 # Input from user
-user_input = st.text_input("Ask something in English:")
+user_input = st.text_input("You:")
 
 # Generate response when user submits
 if user_input:
