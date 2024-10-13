@@ -72,53 +72,31 @@ def generate_audio(text):
 
 # Function to display avatar and play audio
 def display_avatar_and_audio(avatar_url, audio_fp):
-    avatar_html = f"""
-    <img src="{avatar_url}" alt="Avatar" width="150" height="150">
-    """
-    audio_html = f"""
-    <audio autoplay>
-        <source src="data:audio/mpeg;base64,{base64.b64encode(audio_fp.read()).decode('utf-8')}" type="audio/mpeg">
-    </audio>
-    """
+    avatar_html = f'<img src="{avatar_url}" alt="Avatar" width="150" height="150">'
+    audio_html = f'<audio autoplay><source src="data:audio/mpeg;base64,{base64.b64encode(audio_fp.read()).decode("utf-8")}" type="audio/mpeg"></audio>'
     st.markdown(avatar_html, unsafe_allow_html=True)
     st.markdown(audio_html, unsafe_allow_html=True)
 
 # Streamlit app code
 def app():
     st.title("Generative AI Chatbot with Cornell Dataset")
-
-    # Session state to store conversation history
     if 'conversation' not in st.session_state:
         st.session_state.conversation = []
-
-    # User input for the chatbot
     user_input = st.text_input("You:")
-
-    # Avatar link (replace with an actual avatar image link from GitHub or public URL)
     avatar_url = "https://raw.githubusercontent.com/oxayavongsa/generative-ai-chatbot/main/images/Man_Avatar.png"
 
-    # Generate chatbot response when the user submits input
     if user_input:
         response = generate_response(user_input)
-
-        # Append conversation history
         st.session_state.conversation.append({"user": user_input, "bot": response})
-
-        # Generate TTS audio for the bot response
         audio_fp = generate_audio(response)
-
-        # Display avatar and play audio
         display_avatar_and_audio(avatar_url, audio_fp)
 
-    # Display conversation history
     for chat in st.session_state.conversation:
         st.write(f"**You:** {chat['user']}")
         st.write(f"**Bot:** {chat['bot']}")
 
-    # Button to clear conversation history
     if st.button("Clear Conversation"):
         st.session_state.conversation = []
 
-# Launch the Streamlit app
 if __name__ == '__main__':
     app()
