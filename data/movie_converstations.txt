@@ -1,0 +1,20 @@
+# Function to load and parse movie_conversations.txt
+def parse_movie_conversations(conversations_file):
+    conversations = []
+    with open(conversations_file, 'r', encoding='utf-8', errors='replace') as file:
+        for line in file:
+            parts = line.strip().split(" +++$+++ ")
+            if len(parts) == 4:
+                line_ids = eval(parts[3])  # This is a list of line IDs in a conversation
+                conversations.append(line_ids)
+    return conversations
+
+# Path to the movie_conversations.txt file
+conversations_file = 'data/movie_conversations.txt'
+
+# Load the movie conversations
+movie_conversations = parse_movie_conversations(conversations_file)
+
+# Display a few sample conversations
+for conversation in movie_conversations[:5]:
+    print(f"Conversation: {conversation}")
