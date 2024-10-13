@@ -10,15 +10,9 @@ import zipfile
 import gdown
 from kaggle.api.kaggle_api_extended import KaggleApi
 
-# Function to download and extract the dataset
-def download_dataset():
-    # Set your Kaggle credentials in environment variables (ensure they are set securely)
-    os.environ['KAGGLE_USERNAME'] = 'outhaixayavongsa'
-    os.environ['KAGGLE_KEY'] = '013bebdbf0776ed704f846ef0b3b3381'
-
-    # Function to download dataset from Kaggle
-    def download_from_kaggle():
-    api = KaggleApi()
+# Function to download dataset from Kaggle
+def download_from_kaggle():
+    api = KaggleApi()  # Indented this line properly
     api.authenticate()
     try:
         api.dataset_download_files('rajathmc/cornell-moviedialog-corpus', path='data', unzip=True)
