@@ -61,9 +61,8 @@ def app():
     # User input for the chatbot
     user_input = st.text_input("You:")
 
-    # Avatar link (use a direct Google Drive link)
-   avatar_url = "https://raw.githubusercontent.com/oxayavongsa/generative-ai-chatbot/main/images/Man_Avatar.png"
-
+    # Avatar link (replace with an actual avatar image link)
+    avatar_url = "https://raw.githubusercontent.com/oxayavongsa/generative-ai-chatbot/main/images/Man_Avatar.png"
 
     # Generate chatbot response when the user submits input
     if user_input:
