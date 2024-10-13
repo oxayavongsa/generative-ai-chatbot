@@ -2,8 +2,4 @@ streamlit
 transformers
 torch
 gTTS
-pandas
-gdown
 requests
-kaggle
-kaggleapi
