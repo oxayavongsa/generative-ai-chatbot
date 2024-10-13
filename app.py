@@ -1,3 +1,4 @@
+# Import necessary libraries
 import os
 import streamlit as st
 from transformers import T5Tokenizer, T5ForConditionalGeneration
@@ -5,7 +6,8 @@ from gtts import gTTS
 import base64
 from io import BytesIO
 import torch
-from zipfile import ZipFile
+import zipfile
+import gdown
 from kaggle.api.kaggle_api_extended import KaggleApi
 
 # Function to download and extract the dataset
@@ -14,22 +16,36 @@ def download_dataset():
     os.environ['KAGGLE_USERNAME'] = 'outhaixayavongsa'
     os.environ['KAGGLE_KEY'] = '013bebdbf0776ed704f846ef0b3b3381'
 
-    # Initialize Kaggle API
+    # Function to download dataset from Kaggle
+    def download_from_kaggle():
     api = KaggleApi()
     api.authenticate()
+    try:
+        api.dataset_download_files('rajathmc/cornell-moviedialog-corpus', path='data', unzip=True)
+        st.write("Downloaded dataset from Kaggle successfully!")
+        return True
+    except Exception as e:
+        st.write("Kaggle download failed: ", e)
+        return False
+        
+# Function to download dataset from Google Drive
+def download_from_gdrive():
+    url = 'https://drive.google.com/uc?id=1SRKwsK00pEBBezUA5zGM8So6kay4i9Qs'
+    output = 'data/cornell-movie-dialogs-corpus.zip'
+    gdown.download(url, output, quiet=False)
 
-    # Download the dataset
-    dataset_path = 'data/cornell-movie-dialogs-corpus.zip'
-    api.dataset_download_file('rajathmc/cornell-moviedialog-corpus', 'cornell-movie-dialogs-corpus.zip', path='data')
-
-    # Unzip the dataset
-    with ZipFile(dataset_path, 'r') as zip_ref:
+    # Unzipping the dataset
+    with zipfile.ZipFile(output, 'r') as zip_ref:
         zip_ref.extractall('data/')
+    st.write("Downloaded dataset from Google Drive successfully!")
 
-# Call the dataset download function
-download_dataset()
+# Attempt to download the dataset from Kaggle first
+if not os.path.exists('data/movie_lines.txt'):
+    if not download_from_kaggle():
+        # If Kaggle fails, download from Google Drive
+        download_from_gdrive()
 
-# File paths after extracting
+# Now you can use the extracted files
 lines_file = 'data/cornell movie-dialogs-corpus/movie_lines.txt'
 conversations_file = 'data/cornell movie-dialogs-corpus/movie_conversations.txt'
 
@@ -82,7 +98,7 @@ def app():
     user_input = st.text_input("You:")
 
     # Avatar link (replace with an actual avatar image link)
-    avatar_url = "https://drive.google.com/uc?id=1X3dYj0dgdtu-updhhfJA4KIRX_QN96mi"
+    avatar_url = "https://your-avatar-url.com"  # Replace with the actual avatar image URL
 
     # Generate chatbot response when the user submits input
     if user_input:
