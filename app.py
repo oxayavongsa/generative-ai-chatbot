@@ -1,9 +1,7 @@
-from transformers import T5Tokenizer, T5ForConditionalGeneration
-import torch
-
 # Import necessary libraries
 import os
 import streamlit as st
+import transformers
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 from gtts import gTTS
 import base64
