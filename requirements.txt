@@ -3,3 +3,4 @@ torch
 streamlit
 gTTS
 kaggle
+pandas
