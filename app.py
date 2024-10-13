@@ -1,3 +1,22 @@
+import pandas as pd
+
+# Assuming the dataset is in the same directory as your app.py
+def load_data():
+    lines_file = 'movie_lines.txt'
+    conversations_file = 'movie_conversations.txt'
+
+    # Load the data (adjust the parsing according to your logic)
+    with open(lines_file, 'r', encoding='utf-8', errors='replace') as f:
+        lines = f.readlines()
+
+    with open(conversations_file, 'r', encoding='utf-8', errors='replace') as f:
+        conversations = f.readlines()
+
+    return lines, conversations
+
+# Load the data when the app starts
+lines, conversations = load_data()
+
 import torch
 from transformers import T5Tokenizer, T5ForConditionalGeneration
 import streamlit as st
