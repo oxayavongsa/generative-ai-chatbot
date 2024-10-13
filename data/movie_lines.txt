@@ -1,0 +1,21 @@
+# Function to load and parse movie_lines.txt
+def parse_movie_lines(lines_file):
+    lines = {}
+    with open(lines_file, 'r', encoding='utf-8', errors='replace') as file:
+        for line in file:
+            parts = line.strip().split(" +++$+++ ")
+            if len(parts) == 5:
+                line_id = parts[0]
+                text = parts[4]
+                lines[line_id] = text
+    return lines
+
+# Path to the movie_lines.txt file
+lines_file = 'data/movie_lines.txt'
+
+# Load the movie lines
+movie_lines = parse_movie_lines(lines_file)
+
+# Display a few sample lines
+for line_id, text in list(movie_lines.items())[:5]:
+    print(f"Line ID: {line_id}, Text: {text}")
