@@ -10,21 +10,42 @@ import base64
 from io import BytesIO
 import torch
 import zipfile
-from kaggle.api.kaggle_api_extended import KaggleApi
+import requests
 
-# Download dataset using Kaggle API
-def download_dataset():
-    api = KaggleApi()
-    api.authenticate()
-    api.dataset_download_file('rajathmc/cornell-moviedialog-corpus', 'cornell-movie-dialogs-corpus.zip', path='data/')
-    with zipfile.ZipFile('data/cornell-movie-dialogs-corpus.zip', 'r') as zip_ref:
-        zip_ref.extractall('data/')
-    print("Downloaded dataset from Kaggle successfully!")
+# Function to download file from Google Drive
+def download_file_from_google_drive(id, destination):
+    URL = "https://drive.google.com/uc?export=download"
+    session = requests.Session()
+    response = session.get(URL, params={'id': id}, stream=True)
+    token = get_confirm_token(response)
+    if token:
+        params = {'id': id, 'confirm': token}
+        response = session.get(URL, params=params, stream=True)
+    save_response_content(response, destination)
 
-# Download the dataset (remove if already downloaded)
-download_dataset()
+def get_confirm_token(response):
+    for key, value in response.cookies.items():
+        if key.startswith('download_warning'):
+            return value
+    return None
 
-# Path to the extracted dataset files
+def save_response_content(response, destination):
+    CHUNK_SIZE = 32768
+    with open(destination, "wb") as f:
+        for chunk in response.iter_content(CHUNK_SIZE):
+            if chunk:
+                f.write(chunk)
+
+# Download the dataset from Google Drive
+file_id = '1SRKwsK00pEBBezUA5zGM8So6kay4i9Qs'  # Your file ID from Google Drive
+destination = 'data/cornell-movie-dialogs-corpus.zip'
+download_file_from_google_drive(file_id, destination)
+
+# Unzip the dataset
+with zipfile.ZipFile(destination, 'r') as zip_ref:
+    zip_ref.extractall('data/')
+
+# Paths to the extracted files
 lines_file = 'data/cornell movie-dialogs-corpus/movie_lines.txt'
 conversations_file = 'data/cornell movie-dialogs-corpus/movie_conversations.txt'
 
