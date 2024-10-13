@@ -57,7 +57,7 @@ model.to(device)
 
 # Function to generate chatbot responses
 def generate_response(user_input):
-    input_text = f"dialogue: {user_input.strip()} </s>"
+    input_text = user_input.strip()  # Removed the "dialogue:" prefix
     input_ids = tokenizer.encode(input_text, return_tensors='pt').to(device)
     outputs = model.generate(input_ids, max_length=100, num_beams=5, early_stopping=True)
     response = tokenizer.decode(outputs[0], skip_special_tokens=True)
