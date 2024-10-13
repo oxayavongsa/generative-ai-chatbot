@@ -19,3 +19,21 @@ movie_lines = parse_movie_lines(lines_file)
 # Display a few sample lines
 for line_id, text in list(movie_lines.items())[:5]:
     print(f"Line ID: {line_id}, Text: {text}")
+
+# Function to create dialog pairs from movie lines and conversations
+def create_dialog_pairs(conversations, lines):
+    dialog_pairs = []
+    for conversation in conversations:
+        for i in range(len(conversation) - 1):
+            input_line = lines.get(conversation[i], "")
+            response_line = lines.get(conversation[i + 1], "")
+            if input_line and response_line:
+                dialog_pairs.append((input_line, response_line))
+    return dialog_pairs
+
+# Create dialog pairs
+dialog_pairs = create_dialog_pairs(movie_conversations, movie_lines)
+
+# Display a few sample dialog pairs
+for pair in dialog_pairs[:5]:
+    print(f"Input: {pair[0]}\nResponse: {pair[1]}\n")
