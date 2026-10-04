@@ -68,7 +68,7 @@ cd generative-ai-chatbot
 pip install streamlit transformers torch gTTS sentencepiece requests
 streamlit run app.py
 ```
-Then open http://localhost:8501. The first launch downloads the `t5-small` weights and the corpus, so allow a minute. gTTS needs internet access.
+Then open `localhost:8501` in your browser. The first launch downloads the `t5-small` weights and the corpus, so allow a minute. gTTS needs internet access.
 
 **Codespaces:** open the repo in a GitHub Codespace and the dev container installs dependencies and starts the app automatically.
 
