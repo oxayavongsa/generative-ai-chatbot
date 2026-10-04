@@ -83,7 +83,7 @@ def app():
     if 'conversation' not in st.session_state:
         st.session_state.conversation = []
     user_input = st.text_input("You:")
-    avatar_url = "https://raw.githubusercontent.com/oxayavongsa/generative-ai-chatbot/main/images/Man_Avatar.png"
+    avatar_url = "https://raw.githubusercontent.com/oxayavongsa/generative-ai-chatbot/main/images/Man%20Avatar.png"
 
     if user_input:
         response = generate_response(user_input)
